@@ -62,7 +62,16 @@ namespace Attendance_Server
 
             services.AddDbContext<AttendanceContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("AttendanceConnection")));
-            
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+
 
 
         }
@@ -79,6 +88,7 @@ namespace Attendance_Server
                 app.UseHsts();
             }
 
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();

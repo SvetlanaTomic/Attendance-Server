@@ -7,64 +7,61 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Entities;
 using AttendanceServer.Models;
-using AttendanceServer.Services;
 
 namespace AttendanceServer.Controllers
 {
-    [Route("attendance/api/admins")]
+    [Route("attendance/api/attendances")]
     [ApiController]
-    public class AdminsController : ControllerBase
+    public class AttedancesController : ControllerBase
     {
         private readonly AttendanceContext _context;
-        private readonly IAdminService _adminService;
 
-        public AdminsController(AttendanceContext context, IAdminService adminService)
+        public AttedancesController(AttendanceContext context)
         {
             _context = context;
-            _adminService = adminService;
         }
 
-        // GET: api/Admins
+        // GET: api/Attedances
         [HttpGet]
-        public IEnumerable<Admin> GetAdmins()
+        public IEnumerable<Attedance> GetAttedances()
         {
-            return _context.Admins;
+            return _context.Attedances;
         }
 
-        // GET: api/Admins/5
+        // GET: api/Attedances/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAdmin([FromRoute] int id)
+        public async Task<IActionResult> GetAttedance([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
+            var attedance = await _context.Attedances.FindAsync(id);
 
-            if (admin == null)
+            if (attedance == null)
             {
                 return NotFound();
             }
 
-            return Ok(admin);
+            return Ok(attedance);
         }
 
-        // PUT: api/Admins/5
+        // PUT: api/Attedances/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdmin([FromRoute] int id, [FromBody] Admin admin)
+        public async Task<IActionResult> PutAttedance([FromRoute] int id, [FromBody] Attedance attedance)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != admin.AdminId)
+            if (id != attedance.AttedanceId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(admin).State = EntityState.Modified;
+            _context.Entry(attedance).State = EntityState.Modified;
 
             try
             {
@@ -72,7 +69,7 @@ namespace AttendanceServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AdminExists(id))
+                if (!AttedanceExists(id))
                 {
                     return NotFound();
                 }
@@ -85,45 +82,45 @@ namespace AttendanceServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Admins
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginAdmin([FromBody] Admin admin)
+        // POST: api/Attedances
+        [HttpPost]
+        public async Task<IActionResult> PostAttedance([FromBody] Attedance attedance)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Admin nAdmin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == admin.Username && a.Password == admin.Password);
-            if (nAdmin!=null)
-                return Ok(_adminService.Authenticate(nAdmin));
-            return NotFound();
+            _context.Attedances.Add(attedance);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetAttedance", new { id = attedance.AttedanceId }, attedance);
         }
 
-        // DELETE: api/Admins/5
+        // DELETE: api/Attedances/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAdmin([FromRoute] int id)
+        public async Task<IActionResult> DeleteAttedance([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
-            if (admin == null)
+            var attedance = await _context.Attedances.FindAsync(id);
+            if (attedance == null)
             {
                 return NotFound();
             }
 
-            _context.Admins.Remove(admin);
+            _context.Attedances.Remove(attedance);
             await _context.SaveChangesAsync();
 
-            return Ok(admin);
+            return Ok(attedance);
         }
 
-        private bool AdminExists(int id)
+        private bool AttedanceExists(int id)
         {
-            return _context.Admins.Any(e => e.AdminId == id);
+            return _context.Attedances.Any(e => e.AttedanceId == id);
         }
     }
 }

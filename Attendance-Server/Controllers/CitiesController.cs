@@ -7,64 +7,61 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Entities;
 using AttendanceServer.Models;
-using AttendanceServer.Services;
 
 namespace AttendanceServer.Controllers
 {
-    [Route("attendance/api/admins")]
+    [Route("attendance/api/cities")]
     [ApiController]
-    public class AdminsController : ControllerBase
+    public class CitiesController : ControllerBase
     {
         private readonly AttendanceContext _context;
-        private readonly IAdminService _adminService;
 
-        public AdminsController(AttendanceContext context, IAdminService adminService)
+        public CitiesController(AttendanceContext context)
         {
             _context = context;
-            _adminService = adminService;
         }
 
-        // GET: api/Admins
+        // GET: api/Cities
         [HttpGet]
-        public IEnumerable<Admin> GetAdmins()
+        public IEnumerable<City> GetCities()
         {
-            return _context.Admins;
+            return _context.Cities;
         }
 
-        // GET: api/Admins/5
+        // GET: api/Cities/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAdmin([FromRoute] int id)
+        public async Task<IActionResult> GetCity([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
+            var city = await _context.Cities.FindAsync(id);
 
-            if (admin == null)
+            if (city == null)
             {
                 return NotFound();
             }
 
-            return Ok(admin);
+            return Ok(city);
         }
 
-        // PUT: api/Admins/5
+        // PUT: api/Cities/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdmin([FromRoute] int id, [FromBody] Admin admin)
+        public async Task<IActionResult> PutCity([FromRoute] int id, [FromBody] City city)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != admin.AdminId)
+            if (id != city.CityId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(admin).State = EntityState.Modified;
+            _context.Entry(city).State = EntityState.Modified;
 
             try
             {
@@ -72,7 +69,7 @@ namespace AttendanceServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AdminExists(id))
+                if (!CityExists(id))
                 {
                     return NotFound();
                 }
@@ -85,45 +82,45 @@ namespace AttendanceServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Admins
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginAdmin([FromBody] Admin admin)
+        // POST: api/Cities
+        [HttpPost]
+        public async Task<IActionResult> PostCity([FromBody] City city)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Admin nAdmin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == admin.Username && a.Password == admin.Password);
-            if (nAdmin!=null)
-                return Ok(_adminService.Authenticate(nAdmin));
-            return NotFound();
+            _context.Cities.Add(city);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetCity", new { id = city.CityId }, city);
         }
 
-        // DELETE: api/Admins/5
+        // DELETE: api/Cities/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAdmin([FromRoute] int id)
+        public async Task<IActionResult> DeleteCity([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
-            if (admin == null)
+            var city = await _context.Cities.FindAsync(id);
+            if (city == null)
             {
                 return NotFound();
             }
 
-            _context.Admins.Remove(admin);
+            _context.Cities.Remove(city);
             await _context.SaveChangesAsync();
 
-            return Ok(admin);
+            return Ok(city);
         }
 
-        private bool AdminExists(int id)
+        private bool CityExists(int id)
         {
-            return _context.Admins.Any(e => e.AdminId == id);
+            return _context.Cities.Any(e => e.CityId == id);
         }
     }
 }

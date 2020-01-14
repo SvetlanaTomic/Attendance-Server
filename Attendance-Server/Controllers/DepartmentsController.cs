@@ -7,64 +7,61 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Entities;
 using AttendanceServer.Models;
-using AttendanceServer.Services;
 
 namespace AttendanceServer.Controllers
 {
-    [Route("attendance/api/admins")]
+    [Route("attendance/api/departments")]
     [ApiController]
-    public class AdminsController : ControllerBase
+    public class DepartmentsController : ControllerBase
     {
         private readonly AttendanceContext _context;
-        private readonly IAdminService _adminService;
 
-        public AdminsController(AttendanceContext context, IAdminService adminService)
+        public DepartmentsController(AttendanceContext context)
         {
             _context = context;
-            _adminService = adminService;
         }
 
-        // GET: api/Admins
+        // GET: api/Departments
         [HttpGet]
-        public IEnumerable<Admin> GetAdmins()
+        public IEnumerable<Department> GetDepartments()
         {
-            return _context.Admins;
+            return _context.Departments;
         }
 
-        // GET: api/Admins/5
+        // GET: api/Departments/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAdmin([FromRoute] int id)
+        public async Task<IActionResult> GetDepartment([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
+            var department = await _context.Departments.FindAsync(id);
 
-            if (admin == null)
+            if (department == null)
             {
                 return NotFound();
             }
 
-            return Ok(admin);
+            return Ok(department);
         }
 
-        // PUT: api/Admins/5
+        // PUT: api/Departments/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdmin([FromRoute] int id, [FromBody] Admin admin)
+        public async Task<IActionResult> PutDepartment([FromRoute] int id, [FromBody] Department department)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != admin.AdminId)
+            if (id != department.DepartmentId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(admin).State = EntityState.Modified;
+            _context.Entry(department).State = EntityState.Modified;
 
             try
             {
@@ -72,7 +69,7 @@ namespace AttendanceServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AdminExists(id))
+                if (!DepartmentExists(id))
                 {
                     return NotFound();
                 }
@@ -85,45 +82,45 @@ namespace AttendanceServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Admins
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginAdmin([FromBody] Admin admin)
+        // POST: api/Departments
+        [HttpPost]
+        public async Task<IActionResult> PostDepartment([FromBody] Department department)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Admin nAdmin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == admin.Username && a.Password == admin.Password);
-            if (nAdmin!=null)
-                return Ok(_adminService.Authenticate(nAdmin));
-            return NotFound();
+            _context.Departments.Add(department);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetDepartment", new { id = department.DepartmentId }, department);
         }
 
-        // DELETE: api/Admins/5
+        // DELETE: api/Departments/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAdmin([FromRoute] int id)
+        public async Task<IActionResult> DeleteDepartment([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var admin = await _context.Admins.FindAsync(id);
-            if (admin == null)
+            var department = await _context.Departments.FindAsync(id);
+            if (department == null)
             {
                 return NotFound();
             }
 
-            _context.Admins.Remove(admin);
+            _context.Departments.Remove(department);
             await _context.SaveChangesAsync();
 
-            return Ok(admin);
+            return Ok(department);
         }
 
-        private bool AdminExists(int id)
+        private bool DepartmentExists(int id)
         {
-            return _context.Admins.Any(e => e.AdminId == id);
+            return _context.Departments.Any(e => e.DepartmentId == id);
         }
     }
 }

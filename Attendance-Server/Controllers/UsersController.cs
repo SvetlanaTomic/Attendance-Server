@@ -11,7 +11,7 @@ using AttendanceServer.Services;
 
 namespace AttendanceServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("attendance/api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
