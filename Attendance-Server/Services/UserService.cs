@@ -8,29 +8,28 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using AttendanceServer.Entities;
 using AttendanceServer.Helpers;
+using System.Threading.Tasks;
 
 namespace AttendanceServer.Services
 {
-    public interface IAdminService
+    public interface IUserService
     {
-        Admin Authenticate(Admin admin);
+        User Authenticate(User user);
     }
 
-    public class AdminService : IAdminService
+    public class UserService : IUserService
     {
-      
-
+        
         private readonly AppSettings _appSettings;
 
-        public AdminService(IOptions<AppSettings> appSettings)
+        public UserService(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
         }
 
-        public Admin Authenticate(Admin admin)
+        public User Authenticate(User user)
         {
-           
-
+            
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
@@ -38,21 +37,31 @@ namespace AttendanceServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, admin.AdminId.ToString())
+                    new Claim(ClaimTypes.Name, user.UserId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            admin.Token = tokenHandler.WriteToken(token);
+            user.Token = tokenHandler.WriteToken(token);
 
             // remove password before returning
-            admin.Password = null;
+            user.Password = null;
 
-            return admin;
+            return user;
         }
 
-     
+        
+
+  
+
+        public Task<bool> Modify(int id, User user)
+        {
+            throw new NotImplementedException();
+        }
+
+       
     }
 }
+
 

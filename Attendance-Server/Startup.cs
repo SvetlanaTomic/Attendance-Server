@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using AttendanceServer.Models;
 
 namespace Attendance_Server
 {
@@ -32,6 +34,7 @@ namespace Attendance_Server
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IUserService, UserService>();
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -56,6 +59,11 @@ namespace Attendance_Server
                     ValidateAudience = false
                 };
             });
+
+            services.AddDbContext<AttendanceContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("AttendanceConnection")));
+            
+
 
         }
 
