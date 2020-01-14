@@ -60,10 +60,10 @@ namespace Attendance_Server
                 };
             });
 
-            services.AddDbContext<UserContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("UserContext")));
-
+            services.AddDbContext<AttendanceContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("AttendanceConnection")));
             
+
 
         }
 

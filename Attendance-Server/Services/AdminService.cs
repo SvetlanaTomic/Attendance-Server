@@ -13,17 +13,12 @@ namespace AttendanceServer.Services
 {
     public interface IAdminService
     {
-        Admin Authenticate(string adminname, string password);
-        IEnumerable<Admin> GetAll();
+        Admin Authenticate(Admin admin);
     }
 
     public class AdminService : IAdminService
     {
-        // admins hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<Admin> _admins = new List<Admin>
-        {
-            new Admin { Id = 1, Username = "test", Password = "test" }
-        };
+      
 
         private readonly AppSettings _appSettings;
 
@@ -32,13 +27,9 @@ namespace AttendanceServer.Services
             _appSettings = appSettings.Value;
         }
 
-        public Admin Authenticate(string username, string password)
+        public Admin Authenticate(Admin admin)
         {
-            var admin = _admins.SingleOrDefault(x => x.Username == username && x.Password == password);
-
-            // return null if admin not found
-            if (admin == null)
-                return null;
+           
 
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -47,7 +38,7 @@ namespace AttendanceServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, admin.Id.ToString())
+                    new Claim(ClaimTypes.Name, admin.AdminId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -61,14 +52,7 @@ namespace AttendanceServer.Services
             return admin;
         }
 
-        public IEnumerable<Admin> GetAll()
-        {
-            // return admins without passwords
-            return _admins.Select(x => {
-                x.Password = null;
-                return x;
-            });
-        }
+     
     }
 }
 

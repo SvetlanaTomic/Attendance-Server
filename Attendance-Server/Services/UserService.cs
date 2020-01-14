@@ -14,23 +14,12 @@ namespace AttendanceServer.Services
 {
     public interface IUserService
     {
-        User Authenticate(string Username, string password);
-        IEnumerable<User> GetAll();
-        Task<User> FindAsync(int id);
-        Task<bool> Modify(int id, User user);
-        Task<User> Add(User user);
-        Task<bool> Remove(User user);
-        bool Exist(int id);
+        User Authenticate(User user);
     }
 
     public class UserService : IUserService
     {
-        // Users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _Users = new List<User>
-        {
-            new User { Id = 1, Username = "test", Password = "test" }
-        };
-
+        
         private readonly AppSettings _appSettings;
 
         public UserService(IOptions<AppSettings> appSettings)
@@ -38,14 +27,9 @@ namespace AttendanceServer.Services
             _appSettings = appSettings.Value;
         }
 
-        public User Authenticate(string username, string password)
+        public User Authenticate(User user)
         {
-            var User = _Users.SingleOrDefault(x => x.Username == username && x.Password == password);
-
-            // return null if User not found
-            if (User == null)
-                return null;
-
+            
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
@@ -53,28 +37,21 @@ namespace AttendanceServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, User.Id.ToString())
+                    new Claim(ClaimTypes.Name, user.UserId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            User.Token = tokenHandler.WriteToken(token);
+            user.Token = tokenHandler.WriteToken(token);
 
             // remove password before returning
-            User.Password = null;
+            user.Password = null;
 
-            return User;
+            return user;
         }
 
-        public IEnumerable<User> GetAll()
-        {
-            // return Users without passwords
-            return _Users.Select(x => {
-                x.Password = null;
-                return x;
-            });
-        }
+        
 
   
 
@@ -83,25 +60,7 @@ namespace AttendanceServer.Services
             throw new NotImplementedException();
         }
 
-        public Task<User> Add(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> Remove(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Exist(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<User> FindAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
 

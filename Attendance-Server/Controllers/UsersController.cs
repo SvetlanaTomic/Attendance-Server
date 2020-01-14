@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Entities;
 using AttendanceServer.Models;
+using AttendanceServer.Services;
 
 namespace AttendanceServer.Controllers
 {
@@ -14,18 +15,20 @@ namespace AttendanceServer.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserContext _context;
+        private readonly AttendanceContext _context;
+        private IUserService _userService;
 
-        public UsersController(UserContext context)
+        public UsersController(AttendanceContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // GET: api/Users
         [HttpGet]
-        public IEnumerable<User> GetUser()
+        public IEnumerable<User> GetUsers()
         {
-            return _context.User;
+            return _context.Users;
         }
 
         // GET: api/Users/5
@@ -37,7 +40,7 @@ namespace AttendanceServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
 
             if (user == null)
             {
@@ -56,7 +59,7 @@ namespace AttendanceServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != user.Id)
+            if (id != user.UserId)
             {
                 return BadRequest();
             }
@@ -91,10 +94,23 @@ namespace AttendanceServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.User.Add(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+        }
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAdmin([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            User nUser = await _context.Users.FirstOrDefaultAsync(a => a.Username == user.Username && a.Password == user.Password);
+            if (nUser != null)
+                return Ok(_userService.Authenticate(nUser));
+            return NotFound();
         }
 
         // DELETE: api/Users/5
@@ -106,13 +122,13 @@ namespace AttendanceServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            _context.User.Remove(user);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return Ok(user);
@@ -120,7 +136,7 @@ namespace AttendanceServer.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }
