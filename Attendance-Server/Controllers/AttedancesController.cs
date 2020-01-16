@@ -27,7 +27,22 @@ namespace AttendanceServer.Controllers
         {
             return _context.Attedances;
         }
+        [HttpGet("user/{user}")]
+        public async Task<IActionResult> GetAttendencesByUser([FromRoute] int user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var att = await _context.Attedances.ToListAsync();
+            att = att.Where(a => a.UserId == user).ToList();
+            if (att == null)
+            {
+                return NotFound();
+            }
 
+            return Ok(att);
+        }
         // GET: api/Attedances/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAttedance([FromRoute] int id)
