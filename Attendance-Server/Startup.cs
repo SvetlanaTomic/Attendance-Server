@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Models;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace Attendance_Server
 {
@@ -69,7 +70,8 @@ namespace Attendance_Server
                     builder => builder.AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .AllowCredentials());
+                    .AllowCredentials()
+                    );
             });
 
 
@@ -89,9 +91,20 @@ namespace Attendance_Server
             }
 
             app.UseCors("CorsPolicy");
+
+
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    
+                    await Task.CompletedTask;
+                });
+            });
         }
     }
 }

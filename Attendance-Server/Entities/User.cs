@@ -21,8 +21,8 @@ namespace AttendanceServer.Entities
         public string Name { get => name; set => name = value; }
         public string Lastname { get => lastname; set => lastname = value; }
         public string Token { get; internal set; }
-        public string CityId { get;  set; }
-        public string DepartmentId { get;  set; }
+        public int CityId { get;  set; }
+        public int DepartmentId { get;  set; }
         internal Department Department { get => department; set => department = value; }
         internal City City { get => city; set => city = value; }
         internal ICollection<Attedance> Attedances { get => attedances; set => attedances = value; }

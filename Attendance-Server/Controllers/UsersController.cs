@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AttendanceServer.Entities;
 using AttendanceServer.Models;
 using AttendanceServer.Services;
+using System.Data.SqlClient;
 
 namespace AttendanceServer.Controllers
 {
@@ -26,9 +27,15 @@ namespace AttendanceServer.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public IEnumerable<User> GetUsers()
+        public async Task<IActionResult>  GetUsers()
         {
-            return _context.Users;
+            var users = await _context.Users.ToListAsync();
+            if (users == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(users);
         }
 
         // GET: api/Users/5
@@ -82,7 +89,7 @@ namespace AttendanceServer.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Users
@@ -127,9 +134,16 @@ namespace AttendanceServer.Controllers
             {
                 return NotFound();
             }
+            try
+            {
+                _context.Users.Remove(user);
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception )
+            {
+                return Ok(null);
+            }
 
             return Ok(user);
         }
