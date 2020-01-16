@@ -43,6 +43,20 @@ namespace AttendanceServer.Controllers
 
             return Ok(att);
         }
+
+        [HttpGet("user")]
+        public async Task<IActionResult> GetAttendencesGroupByUser()
+        {
+            Dictionary<string, int> userAtt = new Dictionary<string, int>();
+            var users = await _context.Users.ToListAsync();
+            var att = await _context.Attedances.ToListAsync();
+            users.ForEach(u =>
+            {
+                userAtt.Add(u.Username, att.Where(a => a.UserId == u.UserId).Count());
+            });
+
+            return Ok(userAtt);
+        }
         // GET: api/Attedances/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAttedance([FromRoute] int id)
